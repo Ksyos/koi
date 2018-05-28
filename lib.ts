@@ -15,6 +15,7 @@ export interface IStringSchema extends Joi.StringSchema {
     numeric(): this;
     ledgerNumber(): this;
     rangeNumberWithTwoDecimals(): this;
+    simpleEmail(): this;
 }
 
 export interface IKoiSchema extends Joi.AnySchema {
@@ -93,6 +94,7 @@ export const Koi: IKoi = Joi.extend([
             numeric: 'needs to be a string consisting of only numbers',
             ledgerNumber: 'needs to be a string consisting of 4 digits',
             rangeNumberWithTwoDecimals: 'needs to be a number between 0 and 9 with two decimals',
+            email: 'needs to be a valid email string',
         },
         rules: [
             {
@@ -162,6 +164,16 @@ export const Koi: IKoi = Joi.extend([
                         return value;
                     } else {
                         return this.createError('string.rangeNumberWithTwoDecimals', {}, state, options);
+                    }
+                },
+            },
+            {
+                name: 'simpleEmail',
+                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (typeof value === 'string' && /^.+@.+$/.test(value)) {
+                        return value;
+                    } else {
+                        return this.createError('string.simpleEmail', {}, state, options);
                     }
                 },
             },

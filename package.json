@@ -1,6 +1,6 @@
 {
     "name": "@ksyos/koi",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Some small extensions to Joi (in Typescript)",
     "main": "lib.js",
     "types": "lib.d.ts",

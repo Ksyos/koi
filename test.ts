@@ -134,6 +134,33 @@ describe('Totp token validation', () => {
     });
 });
 
+describe('Simple email validation', () => {
+    it('should validate a good simpleEmail', () => {
+        const result = Koi.string().simpleEmail().validate('test@example.com');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good simpleEmail', () => {
+        const result = Koi.string().simpleEmail().validate('teઞȹ3@லstދ@eષxaǭĕǮݩݪmpl@e.com');
+        assert.isNull(result.error);
+    });
+
+    it('should require a simpleEmail to have an @ symbol', () => {
+        const result = Koi.string().simpleEmail().validate('testexample.com');
+        assertErrorType(result, 'string.simpleEmail');
+    });
+
+    it('should require a char before the @ symbol', () => {
+        const result = Koi.string().simpleEmail().validate('@testexample.com');
+        assertErrorType(result, 'string.simpleEmail');
+    });
+
+    it('should require a char after the @ symbol', () => {
+        const result = Koi.string().simpleEmail().validate('testexample.com@');
+        assertErrorType(result, 'string.simpleEmail');
+    });
+});
+
 describe('Registration code validation', () => {
     it('should validate a good registration code', () => {
         const result = Koi.string().registrationCode().validate('ABCDEFGHJKMN');
