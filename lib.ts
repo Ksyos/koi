@@ -94,7 +94,7 @@ export const Koi: IKoi = Joi.extend([
             numeric: 'needs to be a string consisting of only numbers',
             ledgerNumber: 'needs to be a string consisting of 4 digits',
             rangeNumberWithTwoDecimals: 'needs to be a number between 0 and 9 with two decimals',
-            email: 'needs to be a valid email string',
+            simpleEmail: 'needs to be a valid email address',
         },
         rules: [
             {

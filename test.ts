@@ -135,12 +135,12 @@ describe('Totp token validation', () => {
 });
 
 describe('Simple email validation', () => {
-    it('should validate a good simpleEmail', () => {
+    it('should validate a good email address', () => {
         const result = Koi.string().simpleEmail().validate('test@example.com');
         assert.isNull(result.error);
     });
 
-    it('should validate a good simpleEmail', () => {
+    it('should validate an email address with weird characters', () => {
         const result = Koi.string().simpleEmail().validate('teઞȹ3@லstދ@eષxaǭĕǮݩݪmpl@e.com');
         assert.isNull(result.error);
     });
