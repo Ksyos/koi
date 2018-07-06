@@ -23,6 +23,7 @@ export interface IKoiSchema extends Joi.AnySchema {
     date(): this;
     endDate(): this;
     enum(jsEnum: object): this;
+    paging(): this;
 }
 
 export const Koi: IKoi = Joi.extend([
@@ -34,6 +35,7 @@ export const Koi: IKoi = Joi.extend([
             endDate: 'needs to be larger than or equal to start date',
             missingStartDate: 'a startDate field is missing',
             enum: 'needs to be an enum value',
+            paging: 'needs to be a paging value',
         },
         rules: [
             {
@@ -78,6 +80,17 @@ export const Koi: IKoi = Joi.extend([
                         return value;
                     } else {
                         return this.createError('koi.enum', {}, state, options);
+                    }
+                },
+            },
+            {
+                name: 'paging',
+                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (value && typeof value.limit === 'number' && typeof value.offset === 'number' &&
+                        value.limit > 0 && value.offset >= 0) {
+                        return value;
+                    } else {
+                        return this.createError('koi.paging', {}, state, options);
                     }
                 },
             },
