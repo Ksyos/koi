@@ -22,7 +22,7 @@ export interface IKoiSchema extends Joi.AnySchema {
     time(): this;
     date(): this;
     endDate(): this;
-    enum(jsEnum: object): this;
+    enum<E extends { [P in keyof E]: string }>(jsEnum: E): this;
 }
 
 export const Koi: IKoi = Joi.extend([
@@ -72,8 +72,9 @@ export const Koi: IKoi = Joi.extend([
             },
             {
                 name: 'enum',
-                params: { jsEnum: Joi.object().pattern(/.*/, Joi.string()) },
-                validate(params: { jsEnum: object }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                params: { jsEnum: Joi.object().pattern(/.*/, Joi.string().required()) },
+                validate(params: { jsEnum: { [key: string]: string } }, value: any, state: Joi.State,
+                         options: Joi.ValidationOptions) {
                     if (values(params.jsEnum).includes(value)) {
                         return value;
                     } else {
