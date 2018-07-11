@@ -303,3 +303,55 @@ describe('Range number with two decimals validation', () => {
         assertErrorType(result, 'string.rangeNumberWithTwoDecimals');
     });
 });
+
+describe('Paging validation', () => {
+    it('should validate a good paging value', () => {
+        const result = Koi.koi().paging().validate({ limit: 20, offset: 0 });
+        assert.isNull(result.error);
+    });
+
+    it('should not validate a paging object with limit = 0', () => {
+        const result = Koi.koi().paging().validate({ limit: 0, offset: 1 });
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate a paging object with negative limit', () => {
+        const result = Koi.koi().paging().validate({ limit: -1, offset: 0 });
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate a paging object with negative offset', () => {
+        const result = Koi.koi().paging().validate({ limit: 10, offset: -1 });
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate null', () => {
+        const result = Koi.koi().paging().validate(null);
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate an empty object', () => {
+        const result = Koi.koi().paging().validate({});
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate another random object', () => {
+        const result = Koi.koi().paging().validate({ foo: 'bar' });
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate a paging object without offset', () => {
+        const result = Koi.koi().paging().validate({ limit: 20 });
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate a paging object without limit', () => {
+        const result = Koi.koi().paging().validate({ offset: 0 });
+        assertErrorType(result, 'koi.paging');
+    });
+
+    it('should not validate a paging object that is wrongly typed', () => {
+        const result = Koi.koi().paging().validate({ limit: '20', offset: '0' });
+        assertErrorType(result, 'koi.paging');
+    });
+});
