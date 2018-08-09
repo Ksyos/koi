@@ -161,6 +161,80 @@ describe('Simple email validation', () => {
     });
 });
 
+describe('Weight validation', () => {
+    it('should validate a good weight', () => {
+        const result = Koi.string().weight().validate('11');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good weight', () => {
+        const result = Koi.string().weight().validate('11231231231');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good weight with 1 decimals', () => {
+        const result = Koi.string().weight().validate('11,1');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good weight with 2 decimals', () => {
+        const result = Koi.string().weight().validate('11,11');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good weight with a komma', () => {
+        const result = Koi.string().weight().validate('11,');
+        assert.isNull(result.error);
+    });
+
+    it('should be a positive number', () => {
+        const result = Koi.string().weight().validate('-11');
+        assertErrorType(result, 'string.positive');
+    });
+
+    it('should consist of only numbers', () => {
+        const result = Koi.string().weight().validate('1aa');
+        assertErrorType(result, 'string.numberWithTwoOptionalDecimals');
+    });
+
+    it('should consist of only numbers with optional komma', () => {
+        const result = Koi.string().weight().validate('11.1');
+        assertErrorType(result, 'string.numberWithTwoOptionalDecimals');
+    });
+
+    it('should have a max of 2 decimals', () => {
+        const result = Koi.string().weight().validate('11,111');
+        assertErrorType(result, 'string.numberWithTwoOptionalDecimals');
+    });
+});
+
+describe('Height validation', () => {
+    it('should validate a good height', () => {
+        const result = Koi.string().height().validate('11');
+        assert.isNull(result.error);
+    });
+
+    it('should be a positive number', () => {
+        const result = Koi.string().height().validate('-11');
+        assertErrorType(result, 'string.positive');
+    });
+
+    it('should consist of only numbers and no komma', () => {
+        const result = Koi.string().height().validate('11,1');
+        assertErrorType(result, 'string.numeric');
+    });
+
+    it('should consist of only numbers and no point', () => {
+        const result = Koi.string().height().validate('11.1');
+        assertErrorType(result, 'string.numeric');
+    });
+
+    it('should consist of only numbers', () => {
+        const result = Koi.string().height().validate('abc');
+        assertErrorType(result, 'string.numeric');
+    });
+});
+
 describe('Registration code validation', () => {
     it('should validate a good registration code', () => {
         const result = Koi.string().registrationCode().validate('ABCDEFGHJKMN');
