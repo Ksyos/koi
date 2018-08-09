@@ -16,6 +16,8 @@ export interface IStringSchema extends Joi.StringSchema {
     ledgerNumber(): this;
     rangeNumberWithTwoDecimals(): this;
     simpleEmail(): this;
+    weight(): this;
+    height(): this;
 }
 
 export interface IKoiSchema extends Joi.AnySchema {
@@ -96,6 +98,8 @@ export const Koi: IKoi = Joi.extend([
             ledgerNumber: 'needs to be a string consisting of 4 digits',
             rangeNumberWithTwoDecimals: 'needs to be a number between 0 and 9 with two decimals',
             simpleEmail: 'needs to be a valid email address',
+            positive: 'needs to be a positive number',
+            numberWithTwoOptionalDecimals: 'needs to be a number with maximum of 2 decimals seperated by a komma',
         },
         rules: [
             {
@@ -178,6 +182,31 @@ export const Koi: IKoi = Joi.extend([
                     }
                 },
             },
+            {
+                name: 'weight',
+                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (typeof value === 'string' && /\-/.test(value)) {
+                        return this.createError('string.positive', {}, state, options);
+                    } else if (typeof value === 'string' && !/^\d+,{0,1}\d{0,2}$/.test(value)) {
+                        return this.createError('string.numberWithTwoOptionalDecimals', {}, state, options);
+                    } else {
+                        return value;
+                    }
+                },
+            },
+            {
+                name: 'height',
+                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (typeof value === 'string' && /\-/.test(value)) {
+                        return this.createError('string.positive', {}, state, options);
+                    } else if (typeof value === 'string' && !/^\d+$/.test(value)) {
+                        return this.createError('string.numeric', {}, state, options);
+                    } else {
+                        return value;
+                    }
+                },
+            },
+
         ],
     },
 ]);
