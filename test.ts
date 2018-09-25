@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { ValidationResult } from 'joi';
+import { AnySchema, ValidationResult } from 'joi';
 import 'mocha';
 import * as moment from 'moment';
 import { Koi } from './lib';
@@ -267,39 +267,200 @@ describe('Enum validation', () => {
     });
 });
 
-describe('Range number with two decimals validation', () => {
-    it('should validate number in range 0-9 with two decimals 8,90', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('8,90');
-        assert.isNull(result.error);
+describe('Number as string validation', () => {
+    describe('edge cases', () => {
+        function edgeCase(validator: AnySchema, value: any, errorType?: string) {
+            it(errorType ? `should not validate ${value} but error ${errorType}` : `should validate ${value}`, () => {
+                const result = validator.validate(value);
+                if (errorType) {
+                    assertErrorType(result, errorType);
+                } else {
+                    assert.isNull(result.error);
+                }
+            });
+        }
+
+        edgeCase(Koi.numberAsString(), '0');
+        edgeCase(Koi.numberAsString(), '1');
+        edgeCase(Koi.numberAsString(), '2');
+        edgeCase(Koi.numberAsString(), '10');
+        edgeCase(Koi.numberAsString(), '11');
+        edgeCase(Koi.numberAsString(), '123456789');
+        edgeCase(Koi.numberAsString(), '-1');
+        edgeCase(Koi.numberAsString(), '-10');
+        edgeCase(Koi.numberAsString(), '-123456789');
+        edgeCase(Koi.numberAsString(), 1, 'numberAsString.notAString');
+        edgeCase(Koi.numberAsString(), [], 'numberAsString.notAString');
+        edgeCase(Koi.numberAsString(), {}, 'numberAsString.notAString');
+        edgeCase(Koi.numberAsString(), true, 'numberAsString.notAString');
+        edgeCase(Koi.numberAsString(), null, 'numberAsString.notAString');
+        edgeCase(Koi.numberAsString(), '', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString(), '-', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString(), 'a', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString(), '0a', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString(), 'a0', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString(), '0a0', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString(), '-0', 'numberAsString.negativeZero');
+        edgeCase(Koi.numberAsString(), '-00', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString(), '00', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString(), '01', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString(), '01234', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString(), '-01', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString(), '-01234', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '0');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '0.0');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.0');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.00');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '1.2');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '0.1');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.1');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.12');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.120');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-1.2');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-0.1');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-.1');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-.12');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-.120');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '00.01', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '01.234', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '012.34', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-012.34', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '001.234', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '0012.34', 'numberAsString.leadingZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '0.', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-.', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.a', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.a1', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.1a', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '.1a2', 'numberAsString.notANumber');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-0', 'numberAsString.negativeZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-0.0', 'numberAsString.negativeZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-.0', 'numberAsString.negativeZero');
+        edgeCase(Koi.numberAsString().decimalSeparator('.'), '-.00', 'numberAsString.negativeZero');
     });
 
-    it('should validate the last option in the possible range 9,00', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('9,00');
-        assert.isNull(result.error);
+    describe('base', () => {
+        it('should validate a good number as string', () => {
+            const result = Koi.numberAsString().validate('42');
+            assert.isNull(result.error);
+        });
+
+        it('should trim spacing with the convert option', () => {
+            const result = Koi.numberAsString().validate('\t 42\r\n');
+            assert.isNull(result.error);
+            assert.equal(result.value, '42');
+        });
+
+        it('should not trim spacing without the convert option', () => {
+            const result = Koi.numberAsString().validate('\t 42\r\n', { convert: false });
+            assertErrorType(result, 'numberAsString.notANumber');
+        });
+
+        it('should not validate a number with a decimal point', () => {
+            const result = Koi.numberAsString().validate('4.2');
+            assertErrorType(result, 'numberAsString.decimalSeparator');
+        });
+
+        it('should not validate a number with a decimal comma', () => {
+            const result = Koi.numberAsString().validate('4,2');
+            assertErrorType(result, 'numberAsString.decimalSeparator');
+        });
     });
 
-    it('should not validate number with three decimals 8,908', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('8,908');
-        assertErrorType(result, 'string.rangeNumberWithTwoDecimals');
+    describe('decimal', () => {
+        it('should validate a number with a decimal point and the exact amount of decimals', () => {
+            const result = Koi.numberAsString().decimal('.', 2).validate('42.00');
+            assert.isNull(result.error);
+        });
+
+        it('should validate a number with a decimal comma and the exact amount of decimals', () => {
+            const result = Koi.numberAsString().decimal(',', 2).validate('42,00');
+            assert.isNull(result.error);
+        });
+
+        it('should not validate a number with a comma when we require a point', () => {
+            const result = Koi.numberAsString().decimal('.', 2).validate('42,00');
+            assertErrorType(result, 'numberAsString.decimalSeparator');
+        });
+
+        it('should not validate a number with a point when we require a comma', () => {
+            const result = Koi.numberAsString().decimal(',', 2).validate('42.00');
+            assertErrorType(result, 'numberAsString.decimalSeparator');
+        });
+
+        it('should not validate a number with fewer decimals', () => {
+            const result = Koi.numberAsString().decimal('.', 2).validate('42.0');
+            assertErrorType(result, 'numberAsString.minDecimals');
+        });
+
+        it('should not validate a number with more decimals', () => {
+            const result = Koi.numberAsString().decimal('.', 2).validate('42.000');
+            assertErrorType(result, 'numberAsString.maxDecimals');
+        });
     });
 
-    it('should not validate whole number 9', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('9');
-        assertErrorType(result, 'string.rangeNumberWithTwoDecimals');
+    describe('minDecimals', () => {
+        it('should validate a number with the exact amount of decimals', () => {
+            const result = Koi.numberAsString().decimalSeparator('.').minDecimals(3).validate('42.123');
+            assert.isNull(result.error);
+        });
+
+        it('should validate a number with more decimals', () => {
+            const result = Koi.numberAsString().decimalSeparator('.').minDecimals(3).validate('42.1234');
+            assert.isNull(result.error);
+        });
+
+        it('should not validate a number with fewer decimals', () => {
+            const result = Koi.numberAsString().decimalSeparator('.').minDecimals(3).validate('42.12');
+            assertErrorType(result, 'numberAsString.minDecimals');
+        });
     });
 
-    it('should not validate number with one decimal 7,1', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('7,1');
-        assertErrorType(result, 'string.rangeNumberWithTwoDecimals');
+    describe('maxDecimals', () => {
+        it('should validate a number with the exact amount of decimals', () => {
+            const result = Koi.numberAsString().decimalSeparator('.').maxDecimals(3).validate('42.123');
+            assert.isNull(result.error);
+        });
+
+        it('should validate a number with fewer decimals', () => {
+            const result = Koi.numberAsString().decimalSeparator('.').maxDecimals(3).validate('42.12');
+            assert.isNull(result.error);
+        });
+
+        it('should not validate a number with more decimals', () => {
+            const result = Koi.numberAsString().decimalSeparator('.').maxDecimals(3).validate('42.1234');
+            assertErrorType(result, 'numberAsString.maxDecimals');
+        });
     });
 
-    it('should not validate number above 9', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('9,01');
-        assertErrorType(result, 'string.rangeNumberWithTwoDecimals');
-    });
+    describe('min/max/greater/less', () => {
+        function testLimit(limiter: 'min' | 'max' | 'greater' | 'less', limit: number, value: string, valid: boolean) {
+            it(`should ${valid ? 'not ' : ''}limit ${value} to ${limiter} ${limit}`, () => {
+                const result = Koi.numberAsString().decimalSeparator(',')[limiter](limit).validate(value);
+                if (valid) {
+                    assert.isNull(result.error);
+                } else {
+                    assertErrorType(result, `numberAsString.${limiter}`);
+                }
+            });
+        }
 
-    it('should not validate negative number -5,08', () => {
-        const result = Koi.string().rangeNumberWithTwoDecimals().validate('-5,08');
-        assertErrorType(result, 'string.rangeNumberWithTwoDecimals');
+        testLimit('min', 10.2, '42,00', true);
+        testLimit('min', 10.2, '10,20', true);
+        testLimit('min', 10.2, '4,2', false);
+        testLimit('min', 10.2, '10,19999', false);
+        testLimit('max', 10.2, '4,2', true);
+        testLimit('max', 10.2, '10,20', true);
+        testLimit('max', 10.2, '42,00', false);
+        testLimit('max', 10.2, '10,200000001', false);
+        testLimit('greater', -10.2, '-4,20', true);
+        testLimit('greater', -10.2, '-10,19999', true);
+        testLimit('greater', -10.2, '-42,00', false);
+        testLimit('greater', -10.2, '-10,20', false);
+        testLimit('less', 10.2, '4,2', true);
+        testLimit('less', 10.2, '10,19999', true);
+        testLimit('less', 10.2, '42,00', false);
+        testLimit('less', 10.2, '10,20', false);
     });
 });
