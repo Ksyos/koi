@@ -86,7 +86,7 @@ export const Koi: IKoi = Joi.extend([
                 params: { jsEnum: Joi.object().pattern(/.*/, Joi.string().required()) },
                 validate(params: { jsEnum: { [key: string]: string } }, value: any, state: Joi.State,
                          options: Joi.ValidationOptions) {
-                    if (values(params.jsEnum).includes(value)) {
+                    if (values(params.jsEnum).indexOf(value) >= 0) {
                         return value;
                     } else {
                         return this.createError('koi.enum', {}, state, options);
