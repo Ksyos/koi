@@ -57,6 +57,53 @@ describe('Date validation', () => {
     });
 });
 
+describe('Datetime validation', () => {
+    it('should validate a good datetime', () => {
+        const result = Koi.koi().datetime().validate('2010-07-01 11:12:13');
+        assert.isNull(result.error);
+    });
+
+    it('should require datetime to not be an empty string', () => {
+        const result = Koi.koi().datetime().validate('');
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be a date object', () => {
+        const result = Koi.koi().datetime().validate(new Date());
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be a moment object', () => {
+        const result = Koi.koi().datetime().validate(moment());
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be a plain year', () => {
+        const result = Koi.koi().datetime().validate('2010');
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be a plain date', () => {
+        const result = Koi.koi().datetime().validate('2010-07-01');
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be an exclamation', () => {
+        const result = Koi.koi().datetime().validate('yeah');
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be an iso date', () => {
+        const result = Koi.koi().datetime().validate('2010-07-01T10:00:00Z');
+        assertErrorType(result, 'koi.datetime');
+    });
+
+    it('should require datetime to not be non-existent', () => {
+        const result = Koi.koi().datetime().validate('2010-02-31');
+        assertErrorType(result, 'koi.datetime');
+    });
+});
+
 describe('End date validation', () => {
     it('should validate a good end date, when the end date is equal to the start date', () => {
         const result = Koi

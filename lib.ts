@@ -21,6 +21,7 @@ export interface IStringSchema extends Joi.StringSchema {
 export interface IKoiSchema extends Joi.AnySchema {
     time(): this;
     date(): this;
+    datetime(): this;
     endDate(): this;
     enum<E extends { [P in keyof E]: string }>(jsEnum: E): this;
 }
@@ -42,6 +43,7 @@ export const Koi: IKoi = Joi.extend([
         language: {
             time: 'needs to be a valid time string',
             date: 'needs to be a valid date string',
+            datetime: 'needs to be a valid datetime string',
             endDate: 'needs to be larger than or equal to start date',
             missingStartDate: 'a startDate field is missing',
             enum: 'needs to be an enum value',
@@ -64,6 +66,16 @@ export const Koi: IKoi = Joi.extend([
                         return value;
                     } else {
                         return this.createError('koi.date', {}, state, options);
+                    }
+                },
+            },
+            {
+                name: 'datetime',
+                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (typeof value === 'string' && moment(value, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
+                        return value;
+                    } else {
+                        return this.createError('koi.datetime', {}, state, options);
                     }
                 },
             },
