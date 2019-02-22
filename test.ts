@@ -104,6 +104,25 @@ describe('Datetime validation', () => {
     });
 });
 
+describe('Time validation', () => {
+    it('should validate a good time', () => {
+        const result = Koi.koi().time().validate('11:12:13');
+        assert.isNull(result.error);
+    });
+    it('should validate a good time with format', () => {
+        const result = Koi.koi().time('HH:mm').validate('11:12');
+        assert.isNull(result.error);
+    });
+    it('should error on good time with different format', () => {
+        const result = Koi.koi().time('HH:mm').validate('11:12:13');
+        assertErrorType(result, 'koi.time');
+    });
+    it('should error on an incorrect time', () => {
+        const result = Koi.koi().time().validate('2010-07-01 11:12:13');
+        assertErrorType(result, 'koi.time');
+    });
+});
+
 describe('End date validation', () => {
     it('should validate a good end date, when the end date is equal to the start date', () => {
         const result = Koi

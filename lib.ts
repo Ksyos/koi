@@ -19,7 +19,7 @@ export interface IStringSchema extends Joi.StringSchema {
 }
 
 export interface IKoiSchema extends Joi.AnySchema {
-    time(): this;
+    time(format?: string): this;
     date(): this;
     datetime(): this;
     endDate(): this;
@@ -51,8 +51,12 @@ export const Koi: IKoi = Joi.extend([
         rules: [
             {
                 name: 'time',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (typeof value === 'string' && moment(value, 'HH:mm:ss', true).isValid()) {
+                params: { format: Joi.string().optional() },
+                validate(params: { format?: string }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (!params.format) {
+                        params.format = 'HH:mm:ss';
+                    }
+                    if (typeof value === 'string' && moment(value, params.format, true).isValid()) {
                         return value;
                     } else {
                         return this.createError('koi.time', {}, state, options);
