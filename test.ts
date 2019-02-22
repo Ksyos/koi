@@ -104,22 +104,18 @@ describe('Datetime validation', () => {
     });
 });
 
-describe('Time validation', () => {
-    it('should validate a good time', () => {
-        const result = Koi.koi().time().validate('11:12:13');
+describe('TimeWithoutSeconds validation', () => {
+    it('should validate a good time without seconds', () => {
+        const result = Koi.koi().timeWithoutSeconds().validate('11:12');
         assert.isNull(result.error);
     });
-    it('should validate a good time with format', () => {
-        const result = Koi.koi().time('HH:mm').validate('11:12');
-        assert.isNull(result.error);
-    });
-    it('should error on good time with different format', () => {
-        const result = Koi.koi().time('HH:mm').validate('11:12:13');
-        assertErrorType(result, 'koi.time');
+    it('should error on a good time with seconds', () => {
+        const result = Koi.koi().timeWithoutSeconds().validate('11:12:13');
+        assertErrorType(result, 'koi.timeWithoutSeconds');
     });
     it('should error on an incorrect time', () => {
-        const result = Koi.koi().time().validate('2010-07-01 11:12:13');
-        assertErrorType(result, 'koi.time');
+        const result = Koi.koi().timeWithoutSeconds().validate('2010-07-01 11:12:13');
+        assertErrorType(result, 'koi.timeWithoutSeconds');
     });
 });
 
