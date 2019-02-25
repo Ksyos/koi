@@ -104,6 +104,23 @@ describe('Datetime validation', () => {
     });
 });
 
+describe('TimeWithoutSeconds validation', () => {
+    it('should validate a good time without seconds', () => {
+        const result = Koi.koi().timeWithoutSeconds().validate('11:12');
+        assert.isNull(result.error);
+    });
+
+    it('should error on a time that includes seconds', () => {
+        const result = Koi.koi().timeWithoutSeconds().validate('11:12:13');
+        assertErrorType(result, 'koi.timeWithoutSeconds');
+    });
+
+    it('should error on a datetime', () => {
+        const result = Koi.koi().timeWithoutSeconds().validate('2010-07-01 11:12:13');
+        assertErrorType(result, 'koi.timeWithoutSeconds');
+    });
+});
+
 describe('End date validation', () => {
     it('should validate a good end date, when the end date is equal to the start date', () => {
         const result = Koi
