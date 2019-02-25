@@ -43,6 +43,7 @@ export const Koi: IKoi = Joi.extend([
         name: 'koi',
         language: {
             time: 'needs to be a valid time string',
+            timeWithoutSeconds: 'needs to be a valid time without seconds string',
             date: 'needs to be a valid date string',
             datetime: 'needs to be a valid datetime string',
             endDate: 'needs to be larger than or equal to start date',

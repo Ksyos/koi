@@ -109,11 +109,13 @@ describe('TimeWithoutSeconds validation', () => {
         const result = Koi.koi().timeWithoutSeconds().validate('11:12');
         assert.isNull(result.error);
     });
-    it('should error on a good time with seconds', () => {
+
+    it('should error on a time that includes seconds', () => {
         const result = Koi.koi().timeWithoutSeconds().validate('11:12:13');
         assertErrorType(result, 'koi.timeWithoutSeconds');
     });
-    it('should error on an incorrect time', () => {
+
+    it('should error on a datetime', () => {
         const result = Koi.koi().timeWithoutSeconds().validate('2010-07-01 11:12:13');
         assertErrorType(result, 'koi.timeWithoutSeconds');
     });
