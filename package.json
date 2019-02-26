@@ -13,8 +13,6 @@
     "repository": "github:KsyosTech/koi",
     "license": "MIT",
     "dependencies": {
-        "@types/joi": "13.4.5",
-        "joi": "13.7.0",
         "lodash": "^4.17.5",
         "moment": "^2.21.0"
     },
@@ -28,5 +26,9 @@
         "source-map-support": "^0.5.4",
         "tslint": "^5.11.0",
         "typescript": "^3.0.3"
+    },
+    "peerDependencies": {
+        "@types/joi": "^13.4.5",
+        "joi": "^13.7.0"
     }
 }
