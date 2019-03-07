@@ -6,7 +6,6 @@ Some small extensions to Joi (in Typescript).
 
 ```
 npm install @ksyos/koi
-
 ```
 
 ### Browser polyfills
