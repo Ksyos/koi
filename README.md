@@ -8,6 +8,10 @@ Some small extensions to Joi (in Typescript).
 npm install @ksyos/koi
 ```
 
+### Browser polyfills
+
+Koi uses the new ES6 features, Promise, Iterable and Map, so you may need to add polyfills to use with older browsers.
+
 ## Usage
 
 ```ts

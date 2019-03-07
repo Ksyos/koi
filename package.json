@@ -13,8 +13,8 @@
     "repository": "github:KsyosTech/koi",
     "license": "MIT",
     "dependencies": {
-        "@types/joi": "^13.0.7",
-        "joi": "^13.1.2",
+        "@types/joi": "^13.4.5",
+        "joi": "^13.7.0",
         "lodash": "^4.17.5",
         "moment": "^2.21.0"
     },
