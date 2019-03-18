@@ -423,12 +423,12 @@ describe('Number as string validation', () => {
 
         it('should not validate a number with a decimal point', () => {
             const result = Koi.numberAsString().validate('4.2');
-            assertErrorType(result, 'numberAsString.decimalSeparator');
+            assertErrorType(result, 'numberAsString.noDecimals');
         });
 
         it('should not validate a number with a decimal comma', () => {
             const result = Koi.numberAsString().validate('4,2');
-            assertErrorType(result, 'numberAsString.decimalSeparator');
+            assertErrorType(result, 'numberAsString.noDecimals');
         });
     });
 
@@ -445,12 +445,12 @@ describe('Number as string validation', () => {
 
         it('should not validate a number with a comma when we require a point', () => {
             const result = Koi.numberAsString().decimal('.', 2).validate('42,00');
-            assertErrorType(result, 'numberAsString.decimalSeparator');
+            assertErrorType(result, 'numberAsString.decimalPoint');
         });
 
         it('should not validate a number with a point when we require a comma', () => {
             const result = Koi.numberAsString().decimal(',', 2).validate('42.00');
-            assertErrorType(result, 'numberAsString.decimalSeparator');
+            assertErrorType(result, 'numberAsString.decimalComma');
         });
 
         it('should not validate a number with fewer decimals', () => {

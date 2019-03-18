@@ -211,7 +211,9 @@ export const Koi: IKoi = Joi.extend([
             notANumber: 'needs to be a number',
             leadingZero: 'must not have a leading zero',
             negativeZero: 'must not be negative zero',
-            decimalSeparator: 'needs the correct decimal separator',
+            noDecimals: 'must not have decimals',
+            decimalComma: 'must have a decimal comma',
+            decimalPoint: 'must have a decimal point',
             minDecimals: 'needs to have more decimals',
             maxDecimals: 'needs to have fewer decimals',
             min: 'needs to be higher',
@@ -264,11 +266,20 @@ export const Koi: IKoi = Joi.extend([
             }
             const decimals = i - indexBeforeDecimals;
 
-            if (decimalSeparator && decimals === 0) {
-                return this.createError('numberAsString.notANumber', {}, state, options);
-            }
-            if (decimalSeparator && decimalSeparator !== (this as any)._flags._decimalSeparator) {
-                return this.createError('numberAsString.decimalSeparator', {}, state, options);
+            if (decimalSeparator) {
+                if (decimals === 0) {
+                    return this.createError('numberAsString.notANumber', {}, state, options);
+                }
+                const flag = (this as any)._flags._decimalSeparator;
+                if (flag === undefined) {
+                    return this.createError('numberAsString.noDecimals', {}, state, options);
+                }
+                if (flag === ',' && decimalSeparator !== flag) {
+                    return this.createError('numberAsString.decimalComma', {}, state, options);
+                }
+                if (flag === '.' && decimalSeparator !== flag) {
+                    return this.createError('numberAsString.decimalPoint', {}, state, options);
+                }
             }
             if (wrongLeadingZero) {
                 return this.createError('numberAsString.leadingZero', {}, state, options);
