@@ -22,6 +22,7 @@ export interface IKoiSchema extends Joi.AnySchema {
     time(): this;
     timeWithoutSeconds(): this;
     date(): this;
+    isoDate(): this;
     datetime(): this;
     endDate(): this;
     enum<E extends { [P in keyof E]: string }>(jsEnum: E): this;
@@ -45,6 +46,7 @@ export const Koi: IKoi = Joi.extend([
             time: 'needs to be a valid time string',
             timeWithoutSeconds: 'needs to be a valid time without seconds string',
             date: 'needs to be a valid date string',
+            isoDate: 'needs to be a valid iso date string',
             datetime: 'needs to be a valid datetime string',
             endDate: 'needs to be larger than or equal to start date',
             missingStartDate: 'a startDate field is missing',
@@ -82,6 +84,23 @@ export const Koi: IKoi = Joi.extend([
                 },
             },
             {
+                name: 'isoDate',
+                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+                    if (typeof value === 'string') {
+                        const schema = Koi.object({ isoDate: Joi.date().iso().strict(false) })
+                            .options({ convert: false, presence: 'required' });
+
+                        const result = schema.validate({ isoDate: value });
+                        if (result.error) {
+                            return this.createError('koi.isoDate', {}, state, options);
+                        } else if (result.value) {
+                            return result.value;
+                        }
+                    }
+                    return this.createError('koi.isoDate', {}, state, options);
+                },
+            },
+            {
                 name: 'datetime',
                 validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
                     if (typeof value === 'string' && moment(value, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
@@ -108,8 +127,8 @@ export const Koi: IKoi = Joi.extend([
             {
                 name: 'enum',
                 params: { jsEnum: Joi.object().pattern(/.*/, Joi.string().required()) },
-                validate(params: { jsEnum: { [key: string]: string } }, value: any, state: Joi.State,
-                         options: Joi.ValidationOptions) {
+                // tslint:disable-next-line:max-line-length
+                validate(params: { jsEnum: { [key: string]: string } }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
                     if (values(params.jsEnum).indexOf(value) >= 0) {
                         return value;
                     } else {

@@ -10,6 +10,73 @@ function assertErrorType(result: ValidationResult<any>, errorType: string) {
     assert.equal(result.error.details[0].type, errorType);
 }
 
+describe('Iso date validation', () => {
+    it('should validate a good iso date', () => {
+        const result = Koi.koi().isoDate().validate('2019-07-25T14:22:05+00:00');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good iso date without timezone addition', () => {
+        const result = Koi.koi().isoDate().validate('2019-07-25T14:22:05');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good iso date without seconds', () => {
+        const result = Koi.koi().isoDate().validate('2019-07-25T14:22');
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good moment to toISOString', () => {
+        const result = Koi.koi().isoDate().validate(moment().toISOString());
+        assert.isNull(result.error);
+    });
+
+    it('should validate a good Date to toISOString', () => {
+        const result = Koi.koi().isoDate().validate(new Date().toISOString());
+        assert.isNull(result.error);
+    });
+
+    it('should require iso date to not be an empty string', () => {
+        const result = Koi.koi().isoDate().validate('');
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to not be a date object', () => {
+        const result = Koi.koi().isoDate().validate(new Date());
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to not be a moment object', () => {
+        const result = Koi.koi().isoDate().validate(moment());
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to have valid time', () => {
+        const result = Koi.koi().isoDate().validate('2019-07-25T14');
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to have valid year', () => {
+        const result = Koi.koi().isoDate().validate('07-25T14:22:05+00:00');
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to have valid day in date', () => {
+        const result = Koi.koi().isoDate().validate('2019-07:22:05+00:00');
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to have valid time', () => {
+        const result = Koi.koi().isoDate().validate('14:22:05+00:00');
+        assertErrorType(result, 'koi.isoDate');
+    });
+
+    it('should require iso date to have valid minutes', () => {
+        const result = Koi.koi().isoDate().validate('2019-07-25T14');
+        assertErrorType(result, 'koi.isoDate');
+    });
+});
+
 describe('Date validation', () => {
     it('should validate a good date', () => {
         const result = Koi.koi().date().validate('2010-07-01');
