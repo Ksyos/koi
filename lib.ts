@@ -1,4 +1,5 @@
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
+import { CustomHelpers } from '@hapi/joi';
 import { values } from 'lodash';
 import * as moment from 'moment';
 
@@ -38,195 +39,268 @@ export interface INumberAsStringSchema extends Joi.AnySchema {
     maxDecimals(digits: number): this;
 }
 
-export const Koi: IKoi = Joi.extend([
-    {
-        name: 'koi',
-        language: {
-            time: 'needs to be a valid time string',
-            timeWithoutSeconds: 'needs to be a valid time without seconds string',
-            date: 'needs to be a valid date string',
-            datetime: 'needs to be a valid datetime string',
-            endDate: 'needs to be larger than or equal to start date',
-            missingStartDate: 'a startDate field is missing',
-            enum: 'needs to be an enum value',
+const koiExtention: Joi.ExtensionFactory = (joi) => {
+    return {
+        type: 'koi',
+        messages: {
+            'koi.time': 'needs to be a valid time string',
+            'koi.timeWithoutSeconds': 'needs to be a valid time without seconds string',
+            'koi.date': 'needs to be a valid date string',
+            'koi.datetime': 'needs to be a valid datetime string',
+            'koi.endDate': 'needs to be larger than or equal to start date',
+            'koi.missingStartDate': 'a startDate field is missing',
+            'koi.enum': 'needs to be an enum value',
         },
-        rules: [
-            {
-                name: 'time',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+        rules: {
+            time: {
+                method() {
+                    return this.$_addRule('time');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && moment(value, 'HH:mm:ss', true).isValid()) {
                         return value;
                     } else {
-                        return this.createError('koi.time', {}, state, options);
+                        return helpers.error('koi.time');
                     }
                 },
             },
-            {
-                name: 'timeWithoutSeconds',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            timeWithoutSeconds: {
+                method() {
+                    return this.$_addRule('timeWithoutSeconds');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && moment(value, 'HH:mm', true).isValid()) {
                         return value;
                     } else {
-                        return this.createError('koi.timeWithoutSeconds', {}, state, options);
+                        return helpers.error('koi.timeWithoutSeconds');
                     }
                 },
             },
-            {
-                name: 'date',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            date: {
+                method() {
+                    return this.$_addRule('date');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && moment(value, 'YYYY-MM-DD', true).isValid()) {
                         return value;
                     } else {
-                        return this.createError('koi.date', {}, state, options);
+                        return helpers.error('koi.date');
                     }
                 },
             },
-            {
-                name: 'datetime',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            datetime: {
+                method() {
+                    return this.$_addRule('datetime');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && moment(value, 'YYYY-MM-DD HH:mm:ss', true).isValid()) {
                         return value;
                     } else {
-                        return this.createError('koi.datetime', {}, state, options);
+                        return helpers.error('koi.datetime');
                     }
                 },
             },
-            {
-                name: 'endDate',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (state.parent.startDate === undefined) {
-                        return this.createError('koi.missingStartDate', {}, state, options);
-                    } else if (state.parent.startDate === null || value === null) {
-                        return value;
-                    } else if (moment(value).isSameOrAfter(state.parent.startDate)) {
-                        return value;
-                    } else {
-                        return this.createError('koi.endDate', {}, state, options);
-                    }
+            endDate: {
+                method() {
+                    return this.$_addRule('endDate');
                 },
-            },
-            {
-                name: 'enum',
-                params: { jsEnum: Joi.object().pattern(/.*/, Joi.string().required()) },
-                validate(params: { jsEnum: { [key: string]: string } }, value: any, state: Joi.State,
-                         options: Joi.ValidationOptions) {
-                    if (values(params.jsEnum).indexOf(value) >= 0) {
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    const ancestors = helpers.state.ancestors;
+                    const startDate = ancestors.length > 0 ? ancestors[0].startDate : undefined;
+
+                    if (startDate === undefined) {
+                        return helpers.error('koi.missingStartDate');
+                    } else if (startDate === null || value === null) {
+                        return value;
+                    } else if (moment(value).isSameOrAfter(startDate)) {
                         return value;
                     } else {
-                        return this.createError('koi.enum', {}, state, options);
+                        return helpers.error('koi.endDate');
                     }
                 },
             },
-        ],
-    },
-    {
-        name: 'string',
-        base: Joi.string(),
-        language: {
-            newPasswordRepeat: 'needs to match the new password',
-            totpToken: 'needs to be a string of six digits',
-            registrationCode: 'needs to be a string of 12 upper case letters',
-            elfproef: 'needs to pass the elfproef',
-            numeric: 'needs to be a string consisting of only numbers',
-            ledgerNumber: 'needs to be a string consisting of 4 digits',
-            simpleEmail: 'needs to be a valid email address',
+            enum: {
+                method(jsEnum: any) {
+                    return this.$_addRule({ name: 'enum', args: { jsEnum } });
+                },
+                args: [
+                    {
+                        name: 'jsEnum',
+                        ref: true,
+                        assert: Joi.object().pattern(/.*/, Joi.string().required()),
+                        message: 'needs to be an enum',
+                    },
+                ],
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    if (values(args.jsEnum).indexOf(value) >= 0) {
+                        return value;
+                    } else {
+                        return helpers.error('koi.enum');
+                    }
+                },
+            },
         },
-        rules: [
-            {
-                name: 'newPasswordRepeat',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (value === state.parent.newPassword) {
+    };
+};
+
+const stringExtention: Joi.ExtensionFactory = (joi) => {
+    return {
+        type: 'string',
+        base: joi.string(),
+        messages: {
+            'string.newPasswordRepeat': 'needs to match the new password',
+            'string.totpToken': 'needs to be a string of six digits',
+            'string.registrationCode': 'needs to be a string of 12 upper case letters',
+            'string.elfproef': 'needs to pass the elfproef',
+            'string.numeric': 'needs to be a string consisting of only numbers',
+            'string.ledgerNumber': 'needs to be a string consisting of 4 digits',
+            'string.simpleEmail': 'needs to be a valid email address',
+        },
+        rules: {
+            newPasswordRepeat: {
+                method() {
+                    return this.$_addRule('newPasswordRepeat');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    const ancestors = helpers.state.ancestors;
+                    const newPassword = ancestors.length > 0 ? ancestors[0].newPassword : undefined;
+
+                    if (value === newPassword) {
                         return value;
                     } else {
-                        return this.createError('string.newPasswordRepeat', {}, state, options);
+                        return helpers.error('string.newPasswordRepeat');
                     }
                 },
             },
-            {
-                name: 'totpToken',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            totpToken: {
+                method() {
+                    return this.$_addRule('totpToken');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && /^\d{6}$/.test(value)) {
                         return value;
                     } else {
-                        return this.createError('string.totpToken', {}, state, options);
+                        return helpers.error('string.totpToken');
                     }
                 },
             },
-            {
-                name: 'registrationCode',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            registrationCode: {
+                method() {
+                    return this.$_addRule('registrationCode');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && /^[A-Z]{12}$/.test(value)) {
                         return value;
                     } else {
-                        return this.createError('string.registrationCode', {}, state, options);
+                        return helpers.error('string.registrationCode');
                     }
                 },
             },
-            {
-                name: 'elfproef',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            elfproef: {
+                method() {
+                    return this.$_addRule('elfproef');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && elfproef(value)) {
                         return value;
                     } else {
-                        return this.createError('string.elfproef', {}, state, options);
+                        return helpers.error('string.elfproef');
                     }
                 },
             },
-            {
-                name: 'numeric',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            numeric: {
+                method() {
+                    return this.$_addRule('numeric');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && /^[0-9]*$/.test(value)) {
                         return value;
                     } else {
-                        return this.createError('string.numeric', {}, state, options);
+                        return helpers.error('string.numeric');
                     }
                 },
             },
-            {
-                name: 'ledgerNumber',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            ledgerNumber: {
+                method() {
+                    return this.$_addRule('ledgerNumber');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && /^[0-9]{4}$/.test(value)) {
                         return value;
                     } else {
-                        return this.createError('string.ledgerNumber', {}, state, options);
+                        return helpers.error('string.ledgerNumber');
                     }
                 },
             },
-            {
-                name: 'simpleEmail',
-                validate(params: {}, value: any, state: Joi.State, options: Joi.ValidationOptions) {
+            simpleEmail: {
+                method() {
+                    return this.$_addRule('simpleEmail');
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
                     if (typeof value === 'string' && /^.+@.+$/.test(value)) {
                         return value;
                     } else {
-                        return this.createError('string.simpleEmail', {}, state, options);
+                        return helpers.error('string.simpleEmail');
                     }
                 },
             },
-        ],
-    },
-    {
-        name: 'numberAsString',
-        language: {
-            notAString: 'needs to be a number as a string',
-            notANumber: 'needs to be a number',
-            leadingZero: 'must not have a leading zero',
-            negativeZero: 'must not be negative zero',
-            noDecimals: 'must not have decimals',
-            decimalComma: 'must have a decimal comma',
-            decimalPoint: 'must have a decimal point',
-            minDecimals: 'needs to have more decimals',
-            maxDecimals: 'needs to have fewer decimals',
-            min: 'needs to be higher',
-            max: 'needs to be lower',
-            greater: 'needs to be higher',
-            less: 'needs to be lower',
         },
-        pre(value: any, state: Joi.State, options: Joi.ValidationOptions) {
+    };
+};
+
+const limitArg = {
+    name: 'limit',
+    ref: true,
+    assert: Joi.number(),
+    message: 'needs to be a number',
+};
+
+const decimalSeparatorArg = {
+    name: 'decimalSeparator',
+    ref: true,
+    assert: Joi.valid('.', ','),
+    message: 'needs to be a decimal separator',
+};
+
+const digitsArg = { ...limitArg, name: 'digits' };
+
+const numberAsStringExtention: Joi.ExtensionFactory = (joi) => {
+    return {
+        type: 'numberAsString',
+        messages: {
+            'numberAsString.notAString': 'needs to be a number as a string',
+            'numberAsString.notANumber': 'needs to be a number',
+            'numberAsString.leadingZero': 'must not have a leading zero',
+            'numberAsString.negativeZero': 'must not be negative zero',
+            'numberAsString.noDecimals': 'must not have decimals',
+            'numberAsString.decimalComma': 'must have a decimal comma',
+            'numberAsString.decimalPoint': 'must have a decimal point',
+            'numberAsString.minDecimals': 'needs to have more decimals',
+            'numberAsString.maxDecimals': 'needs to have fewer decimals',
+            'numberAsString.min': 'needs to be higher',
+            'numberAsString.max': 'needs to be lower',
+            'numberAsString.greater': 'needs to be higher',
+            'numberAsString.less': 'needs to be lower',
+        },
+        flags: {
+            decimalSeparator: {
+                setter: '_decimalSeparator',
+            },
+            minDecimals: {
+                default: 0,
+                setter: '_minDecimals',
+            },
+            maxDecimals: {
+                default: 0,
+                setter: '_minDecimals',
+            },
+        },
+        validate(value: any, helpers: CustomHelpers) {
             if (typeof value !== 'string') {
-                return this.createError('numberAsString.notAString', {}, state, options);
+                return { value, errors: helpers.error('numberAsString.notAString') };
             }
 
-            if (options.convert) {
+            if (helpers.prefs.convert) {
                 value = value.trim();
             }
 
@@ -238,7 +312,7 @@ export const Koi: IKoi = Joi.extend([
             }
 
             if (i === value.length) {
-                return this.createError('numberAsString.notANumber', {}, state, options);
+                return { value, errors: helpers.error('numberAsString.notANumber') };
             }
 
             const wrongLeadingZero = value[i] === '0' && i + 1 < value.length && !/[.,]/.test(value[i + 1]);
@@ -252,7 +326,7 @@ export const Koi: IKoi = Joi.extend([
                 } else if (/[0-9]/.test(value[i])) {
                     i++;
                 } else {
-                    return this.createError('numberAsString.notANumber', {}, state, options);
+                    return { value, errors: helpers.error('numberAsString.notANumber') };
                 }
             }
 
@@ -261,119 +335,144 @@ export const Koi: IKoi = Joi.extend([
                 if (/[0-9]/.test(value[i])) {
                     i++;
                 } else {
-                    return this.createError('numberAsString.notANumber', {}, state, options);
+                    return { value, errors: helpers.error('numberAsString.notANumber') };
                 }
             }
             const decimals = i - indexBeforeDecimals;
 
             if (decimalSeparator) {
                 if (decimals === 0) {
-                    return this.createError('numberAsString.notANumber', {}, state, options);
+                    return { value, errors: helpers.error('numberAsString.notANumber') };
                 }
-                const flag = (this as any)._flags._decimalSeparator;
+
+                const flag = helpers.schema.$_getFlag('_decimalSeparator');
                 if (flag === undefined) {
-                    return this.createError('numberAsString.noDecimals', {}, state, options);
+                    return { value, errors: helpers.error('numberAsString.noDecimals') };
                 }
                 if (flag === ',' && decimalSeparator !== flag) {
-                    return this.createError('numberAsString.decimalComma', {}, state, options);
+                    return { value, errors: helpers.error('numberAsString.decimalComma') };
                 }
                 if (flag === '.' && decimalSeparator !== flag) {
-                    return this.createError('numberAsString.decimalPoint', {}, state, options);
+                    return { value, errors: helpers.error('numberAsString.decimalPoint') };
                 }
             }
             if (wrongLeadingZero) {
-                return this.createError('numberAsString.leadingZero', {}, state, options);
+                return { value, errors: helpers.error('numberAsString.leadingZero') };
             }
-            if (negative && numberFromString(value, this) === 0) {
-                return this.createError('numberAsString.negativeZero', {}, state, options);
+            if (negative && numberFromString(value, helpers) === 0) {
+                return { value, errors: helpers.error('numberAsString.negativeZero') };
             }
-            if (decimals > (this as any)._flags._maxDecimals) {
-                return this.createError('numberAsString.maxDecimals', {}, state, options);
+            if (decimals > helpers.schema.$_getFlag('_maxDecimals')) {
+                return { value, errors: helpers.error('numberAsString.maxDecimals') };
             }
-            if (decimals < (this as any)._flags._minDecimals) {
-                return this.createError('numberAsString.minDecimals', {}, state, options);
+            if (decimals < helpers.schema.$_getFlag('_minDecimals')) {
+                return { value, errors: helpers.error('numberAsString.minDecimals') };
             }
 
-            return value as any;
+            return { value: numberFromString(value, helpers) };
         },
-        rules: [
-            {
-                name: 'decimal',
-                params: { decimalSeparator: Joi.only('.', ','), digits: Joi.number() },
-                setup(params: { decimalSeparator: '.' | ',', digits: number }) {
-                    (this as any)._flags._decimalSeparator = params.decimalSeparator;
-                    (this as any)._flags._minDecimals = params.digits;
-                    (this as any)._flags._maxDecimals = params.digits;
+        rules: {
+            decimal: {
+                method(decimalSeparator: '.' | ',', digits: number) {
+                    return (this as any)
+                        .decimalSeparator(decimalSeparator)
+                        .minDecimals(digits)
+                        .maxDecimals(digits);
                 },
+                args: [
+                    decimalSeparatorArg,
+                    digitsArg,
+                ],
             },
-            {
-                name: 'decimalSeparator',
-                params: { decimalSeparator: Joi.only('.', ',') },
-                setup(params: { decimalSeparator: '.' | ',' }) {
-                    (this as any)._flags._decimalSeparator = params.decimalSeparator;
+            decimalSeparator: {
+                method(value: '.' | ',') {
+                    return this.$_setFlag('_decimalSeparator', value);
                 },
+                args: [
+                    decimalSeparatorArg,
+                ],
             },
-            {
-                name: 'minDecimals',
-                params: { digits: Joi.number() },
-                setup(params: { digits: number }) {
-                    (this as any)._flags._minDecimals = params.digits;
+            minDecimals: {
+                method(digits: number) {
+                    return this.$_setFlag('_minDecimals', digits);
                 },
+                args: [
+                    digitsArg,
+                ],
             },
-            {
-                name: 'maxDecimals',
-                params: { digits: Joi.number() },
-                setup(params: { digits: number }) {
-                    (this as any)._flags._maxDecimals = params.digits;
+            maxDecimals: {
+                method(digits: number) {
+                    return this.$_setFlag('_maxDecimals', digits);
                 },
+                args: [
+                    digitsArg,
+                ],
             },
-            {
-                name: 'min',
-                params: { limit: Joi.number() },
-                validate(params: { limit: number }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (numberFromString(value, this) >= params.limit) {
-                        return value as any;
+            min: {
+                method(limit: number) {
+                    return this.$_addRule({ name: 'min', args: { limit } });
+                },
+                args: [
+                    limitArg,
+                ],
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    if (value >= args.limit) {
+                        return helpers.original;
                     } else {
-                        return this.createError('numberAsString.min', {}, state, options);
+                        return helpers.error('numberAsString.min');
                     }
                 },
             },
-            {
-                name: 'max',
-                params: { limit: Joi.number() },
-                validate(params: { limit: number }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (numberFromString(value, this) <= params.limit) {
-                        return value as any;
+            max: {
+                method(limit: number) {
+                    return this.$_addRule({ name: 'max', args: { limit } });
+                },
+                args: [
+                    limitArg,
+                ],
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    if (value <= args.limit) {
+                        return helpers.original;
                     } else {
-                        return this.createError('numberAsString.max', {}, state, options);
+                        return helpers.error('numberAsString.max');
                     }
                 },
             },
-            {
-                name: 'greater',
-                params: { limit: Joi.number() },
-                validate(params: { limit: number }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (numberFromString(value, this) > params.limit) {
-                        return value as any;
+            greater: {
+                method(limit: number) {
+                    return this.$_addRule({ name: 'greater', args: { limit } });
+                },
+                args: [
+                    limitArg,
+                ],
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    if (value > args.limit) {
+                        return helpers.original;
                     } else {
-                        return this.createError('numberAsString.greater', {}, state, options);
+                        return helpers.error('numberAsString.greater');
                     }
                 },
             },
-            {
-                name: 'less',
-                params: { limit: Joi.number() },
-                validate(params: { limit: number }, value: any, state: Joi.State, options: Joi.ValidationOptions) {
-                    if (numberFromString(value, this) < params.limit) {
-                        return value as any;
+            less: {
+                method(limit: number) {
+                    return this.$_addRule({ name: 'less', args: { limit } });
+                },
+                args: [
+                    limitArg,
+                ],
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    if (value < args.limit) {
+                        return helpers.original;
                     } else {
-                        return this.createError('numberAsString.less', {}, state, options);
+                        return helpers.error('numberAsString.less');
                     }
                 },
             },
-        ],
-    },
-]);
+        },
+    };
+};
+
+export const Koi: IKoi = Joi.extend(koiExtention, stringExtention, numberAsStringExtention);
 
 function elfproef(bsn: string): boolean {
     if (bsn.length < 8 || bsn.length > 9) {
@@ -388,8 +487,8 @@ function elfproef(bsn: string): boolean {
     return sum % 11 === 0;
 }
 
-function numberFromString(value: string, joi: any) {
-    if (joi._flags._decimalSeparator === ',') {
+function numberFromString(value: string, helpers: CustomHelpers) {
+    if (helpers.schema.$_getFlag('_decimalSeparator') === ',') {
         return Number(value.replace(',', '.'));
     } else {
         return Number(value);
