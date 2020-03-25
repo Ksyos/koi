@@ -39,7 +39,7 @@ export interface INumberAsStringSchema extends Joi.AnySchema {
     maxDecimals(digits: number): this;
 }
 
-const koiExtention: Joi.ExtensionFactory = (joi) => {
+const koiExtension: Joi.ExtensionFactory = (joi) => {
     return {
         type: 'koi',
         messages: {
@@ -143,7 +143,7 @@ const koiExtention: Joi.ExtensionFactory = (joi) => {
     };
 };
 
-const stringExtention: Joi.ExtensionFactory = (joi) => {
+const stringExtension: Joi.ExtensionFactory = (joi) => {
     return {
         type: 'string',
         base: joi.string(),
@@ -264,7 +264,7 @@ const decimalSeparatorArg = {
 
 const digitsArg = { ...limitArg, name: 'digits' };
 
-const numberAsStringExtention: Joi.ExtensionFactory = (joi) => {
+const numberAsStringExtension: Joi.ExtensionFactory = (joi) => {
     return {
         type: 'numberAsString',
         messages: {
@@ -472,7 +472,7 @@ const numberAsStringExtention: Joi.ExtensionFactory = (joi) => {
     };
 };
 
-export const Koi: IKoi = Joi.extend(koiExtention, stringExtention, numberAsStringExtention);
+export const Koi: IKoi = Joi.extend(koiExtension, stringExtension, numberAsStringExtension);
 
 function elfproef(bsn: string): boolean {
     if (bsn.length < 8 || bsn.length > 9) {
