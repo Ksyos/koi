@@ -10,7 +10,7 @@
         "develop": "concurrently 'tsc -w --preserveWatchOutput' 'mocha -w -r source-map-support/register test.js'",
         "prepublishOnly": "npm test"
     },
-    "repository": "github:KsyosTech/koi",
+    "repository": "github:Ksyos/koi",
     "license": "MIT",
     "dependencies": {
         "@hapi/joi": "^17.1.1",
