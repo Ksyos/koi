@@ -1,19 +1,19 @@
+import { AnySchema, ValidationResult } from '@hapi/joi';
 import { assert } from 'chai';
-import { AnySchema, ValidationResult } from 'joi';
 import 'mocha';
 import * as moment from 'moment';
 import { Koi } from './lib';
 
-function assertErrorType(result: ValidationResult<any>, errorType: string) {
-    assert.isNotNull(result.error);
-    assert.lengthOf(result.error.details, 1);
-    assert.equal(result.error.details[0].type, errorType);
+function assertErrorType(result: ValidationResult, errorType: string) {
+    assert.exists(result.error);
+    assert.lengthOf(result.error!.details, 1);
+    assert.equal(result.error!.details[0].type, errorType);
 }
 
 describe('Date validation', () => {
     it('should validate a good date', () => {
         const result = Koi.koi().date().validate('2010-07-01');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require date to not be an empty string', () => {
@@ -60,7 +60,7 @@ describe('Date validation', () => {
 describe('Datetime validation', () => {
     it('should validate a good datetime', () => {
         const result = Koi.koi().datetime().validate('2010-07-01 11:12:13');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require datetime to not be an empty string', () => {
@@ -107,7 +107,7 @@ describe('Datetime validation', () => {
 describe('TimeWithoutSeconds validation', () => {
     it('should validate a good time without seconds', () => {
         const result = Koi.koi().timeWithoutSeconds().validate('11:12');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should error on a time that includes seconds', () => {
@@ -126,14 +126,14 @@ describe('End date validation', () => {
         const result = Koi
             .object({ startDate: Koi.koi().date(), endDate: Koi.koi().date().endDate() })
             .validate({ startDate: '2018-01-10', endDate: '2018-01-10' });
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should validate a good end date, when the end date is larger than the start date', () => {
         const result = Koi
             .object({ startDate: Koi.koi().date(), endDate: Koi.koi().date().endDate() })
             .validate({ startDate: '2018-01-10', endDate: '2018-01-13' });
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require end date to be larger than or equal to start date', () => {
@@ -147,14 +147,14 @@ describe('End date validation', () => {
         const result = Koi
             .object({ startDate: Koi.koi().date().allow(null), endDate: Koi.koi().date().endDate() })
             .validate({ startDate: null, endDate: '2018-01-10' });
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should validate a good end date, when the end date is null', () => {
         const result = Koi
             .object({ startDate: Koi.koi().date(), endDate: Koi.koi().date().endDate().allow(null) })
             .validate({ startDate: '2018-01-10', endDate: null });
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a startDate to not be undefined', () => {
@@ -170,7 +170,7 @@ describe('New password repeat validation', () => {
         const result = Koi
             .object({ newPassword: Koi.string(), newPasswordRepeat: Koi.string().newPasswordRepeat() })
             .validate({ newPassword: 'foo', newPasswordRepeat: 'foo' });
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a correctly repeated new password', () => {
@@ -184,7 +184,7 @@ describe('New password repeat validation', () => {
 describe('Totp token validation', () => {
     it('should validate a good totp token', () => {
         const result = Koi.string().totpToken().validate('012345');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a totp token to be of length 6', () => {
@@ -201,12 +201,12 @@ describe('Totp token validation', () => {
 describe('Simple email validation', () => {
     it('should validate a good email address', () => {
         const result = Koi.string().simpleEmail().validate('test@example.com');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should validate an email address with weird characters', () => {
         const result = Koi.string().simpleEmail().validate('teઞȹ3@லstދ@eષxaǭĕǮݩݪmpl@e.com');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a simpleEmail to have an @ symbol', () => {
@@ -228,7 +228,7 @@ describe('Simple email validation', () => {
 describe('Registration code validation', () => {
     it('should validate a good registration code', () => {
         const result = Koi.string().registrationCode().validate('ABCDEFGHJKMN');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a registration code to be of length 12', () => {
@@ -245,7 +245,7 @@ describe('Registration code validation', () => {
 describe('Elfproef validation', () => {
     it('should validate a good BSN', () => {
         const result = Koi.string().elfproef().validate('150668223');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should not validate a bad BSN ', () => {
@@ -257,7 +257,7 @@ describe('Elfproef validation', () => {
 describe('Numeric string validation', () => {
     it('should validate a good numeric string', () => {
         const result = Koi.string().numeric().validate('12345678');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a numeric string to be just numbers', () => {
@@ -274,7 +274,7 @@ describe('Numeric string validation', () => {
 describe('Ledger number string validation', () => {
     it('should validate a good ledger number string', () => {
         const result = Koi.string().ledgerNumber().validate('1234');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should require a ledger number string to be just numbers', () => {
@@ -297,7 +297,7 @@ describe('Enum validation', () => {
 
     it('should validate a good enum value', () => {
         const result = Koi.koi().enum(Status).validate('started');
-        assert.isNull(result.error);
+        assert.notExists(result.error);
     });
 
     it('should not validate null', () => {
@@ -339,7 +339,7 @@ describe('Number as string validation', () => {
                 if (errorType) {
                     assertErrorType(result, errorType);
                 } else {
-                    assert.isNull(result.error);
+                    assert.notExists(result.error);
                 }
             });
         }
@@ -407,12 +407,12 @@ describe('Number as string validation', () => {
     describe('base', () => {
         it('should validate a good number as string', () => {
             const result = Koi.numberAsString().validate('42');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should trim spacing with the convert option', () => {
             const result = Koi.numberAsString().validate('\t 42\r\n');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
             assert.equal(result.value, '42');
         });
 
@@ -435,12 +435,12 @@ describe('Number as string validation', () => {
     describe('decimal', () => {
         it('should validate a number with a decimal point and the exact amount of decimals', () => {
             const result = Koi.numberAsString().decimal('.', 2).validate('42.00');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should validate a number with a decimal comma and the exact amount of decimals', () => {
             const result = Koi.numberAsString().decimal(',', 2).validate('42,00');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should not validate a number with a comma when we require a point', () => {
@@ -467,12 +467,12 @@ describe('Number as string validation', () => {
     describe('minDecimals', () => {
         it('should validate a number with the exact amount of decimals', () => {
             const result = Koi.numberAsString().decimalSeparator('.').minDecimals(3).validate('42.123');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should validate a number with more decimals', () => {
             const result = Koi.numberAsString().decimalSeparator('.').minDecimals(3).validate('42.1234');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should not validate a number with fewer decimals', () => {
@@ -484,12 +484,12 @@ describe('Number as string validation', () => {
     describe('maxDecimals', () => {
         it('should validate a number with the exact amount of decimals', () => {
             const result = Koi.numberAsString().decimalSeparator('.').maxDecimals(3).validate('42.123');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should validate a number with fewer decimals', () => {
             const result = Koi.numberAsString().decimalSeparator('.').maxDecimals(3).validate('42.12');
-            assert.isNull(result.error);
+            assert.notExists(result.error);
         });
 
         it('should not validate a number with more decimals', () => {
@@ -503,7 +503,7 @@ describe('Number as string validation', () => {
             it(`should ${valid ? 'not ' : ''}limit ${value} to ${limiter} ${limit}`, () => {
                 const result = Koi.numberAsString().decimalSeparator(',')[limiter](limit).validate(value);
                 if (valid) {
-                    assert.isNull(result.error);
+                    assert.notExists(result.error);
                 } else {
                     assertErrorType(result, `numberAsString.${limiter}`);
                 }
