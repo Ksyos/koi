@@ -369,7 +369,7 @@ const numberAsStringExtension: Joi.ExtensionFactory = (joi) => {
                 return { value, errors: helpers.error('numberAsString.minDecimals') };
             }
 
-            return { value: numberFromString(value, helpers) };
+            return { value };
         },
         rules: {
             decimal: {
@@ -416,8 +416,8 @@ const numberAsStringExtension: Joi.ExtensionFactory = (joi) => {
                     limitArg,
                 ],
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    if (value >= args.limit) {
-                        return helpers.original;
+                    if (numberFromString(value, helpers) >= args.limit) {
+                        return value;
                     } else {
                         return helpers.error('numberAsString.min');
                     }
@@ -431,8 +431,8 @@ const numberAsStringExtension: Joi.ExtensionFactory = (joi) => {
                     limitArg,
                 ],
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    if (value <= args.limit) {
-                        return helpers.original;
+                    if (numberFromString(value, helpers) <= args.limit) {
+                        return value;
                     } else {
                         return helpers.error('numberAsString.max');
                     }
@@ -446,8 +446,8 @@ const numberAsStringExtension: Joi.ExtensionFactory = (joi) => {
                     limitArg,
                 ],
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    if (value > args.limit) {
-                        return helpers.original;
+                    if (numberFromString(value, helpers) > args.limit) {
+                        return value;
                     } else {
                         return helpers.error('numberAsString.greater');
                     }
@@ -461,8 +461,8 @@ const numberAsStringExtension: Joi.ExtensionFactory = (joi) => {
                     limitArg,
                 ],
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    if (value < args.limit) {
-                        return helpers.original;
+                    if (numberFromString(value, helpers) < args.limit) {
+                        return value;
                     } else {
                         return helpers.error('numberAsString.less');
                     }

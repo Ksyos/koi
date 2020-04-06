@@ -340,6 +340,7 @@ describe('Number as string validation', () => {
                     assertErrorType(result, errorType);
                 } else {
                     assert.notExists(result.error);
+                    assert.isTrue(typeof result.value === 'string');
                 }
             });
         }
@@ -408,12 +409,13 @@ describe('Number as string validation', () => {
         it('should validate a good number as string', () => {
             const result = Koi.numberAsString().validate('42');
             assert.notExists(result.error);
+            assert.strictEqual(result.value, '42');
         });
 
         it('should trim spacing with the convert option', () => {
             const result = Koi.numberAsString().validate('\t 42\r\n');
             assert.notExists(result.error);
-            assert.equal(result.value, '42');
+            assert.strictEqual(result.value, '42');
         });
 
         it('should not trim spacing without the convert option', () => {
@@ -504,6 +506,7 @@ describe('Number as string validation', () => {
                 const result = Koi.numberAsString().decimalSeparator(',')[limiter](limit).validate(value);
                 if (valid) {
                     assert.notExists(result.error);
+                    assert.isTrue(typeof result.value === 'string');
                 } else {
                     assertErrorType(result, `numberAsString.${limiter}`);
                 }
