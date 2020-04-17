@@ -16,7 +16,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@hapi/joi": "^17.1.1",
+        "@hapi/joi": "^16.1.8",
         "lodash": "^4.17.15",
         "moment": "^2.24.0"
     },
