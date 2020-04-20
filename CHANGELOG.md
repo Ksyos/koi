@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.2 (April 20, 2020)
+
+* Downgraded hapi/joi version to add support for Node 8 and 10 ([#14](https://github.com/Ksyos/koi/pull/14))
+
 ## 3.2.1 (April 07, 2020)
 
 * Fix: numberAsString returns string again ([#13](https://github.com/Ksyos/koi/pull/13))
