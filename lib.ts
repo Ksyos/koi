@@ -1,5 +1,5 @@
-import * as Joi from '@hapi/joi';
-import { CustomHelpers } from '@hapi/joi';
+import * as Joi from 'joi';
+import { CustomHelpers } from 'joi';
 import { values } from 'lodash';
 import * as moment from 'moment';
 

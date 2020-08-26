@@ -1,4 +1,4 @@
-import { AnySchema, ValidationResult } from '@hapi/joi';
+import { AnySchema, ValidationResult } from 'joi';
 import { assert } from 'chai';
 import 'mocha';
 import * as moment from 'moment';
