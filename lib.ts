@@ -134,9 +134,12 @@ const koiExtension: Joi.ExtensionFactory = (joi) => {
                     return this.$_addRule({ name: 'dateAfter', args: { date } });
                 },
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    const otherDate = moment(args.date);
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
 
-                    if (moment(value).isAfter(otherDate)) {
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isAfter(otherDate)) {
                         return value;
                     } else {
                         return helpers.error('koi.dateAfter');
@@ -148,9 +151,12 @@ const koiExtension: Joi.ExtensionFactory = (joi) => {
                     return this.$_addRule({ name: 'dateSameOrAfter', args: { date } });
                 },
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    const otherDate = moment(args.date);
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
 
-                    if (moment(value).isSameOrAfter(otherDate)) {
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isSameOrAfter(otherDate)) {
                         return value;
                     } else {
                         return helpers.error('koi.dateSameOrAfter');
@@ -162,9 +168,12 @@ const koiExtension: Joi.ExtensionFactory = (joi) => {
                     return this.$_addRule({ name: 'dateBefore', args: { date } });
                 },
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    const otherDate = moment(args.date);
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
 
-                    if (moment(value).isBefore(otherDate)) {
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isBefore(otherDate)) {
                         return value;
                     } else {
                         return helpers.error('koi.dateBefore');
@@ -176,9 +185,12 @@ const koiExtension: Joi.ExtensionFactory = (joi) => {
                     return this.$_addRule({ name: 'dateSameOrBefore', args: { date } });
                 },
                 validate(value: any, helpers: any, args: Record<string, any>, options: any) {
-                    const otherDate = moment(args.date);
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
 
-                    if (moment(value).isSameOrBefore(otherDate)) {
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isSameOrBefore(otherDate)) {
                         return value;
                     } else {
                         return helpers.error('koi.dateSameOrBefore');
