@@ -19,10 +19,16 @@ export interface IStringSchema extends Joi.StringSchema {
     simpleEmail(): this;
 }
 
+type DateLike = string | Date;
+
 export interface IKoiSchema extends Joi.AnySchema {
     time(): this;
     timeWithoutSeconds(): this;
     date(): this;
+    dateAfter(date: DateLike): this;
+    dateSameOrAfter(date: DateLike): this;
+    dateBefore(date: DateLike): this;
+    dateSameOrBefore(date: DateLike): this;
     datetime(): this;
     endDate(): this;
     enum<E extends { [P in keyof E]: string }>(jsEnum: E): this;
@@ -46,6 +52,10 @@ const koiExtension: Joi.ExtensionFactory = (joi) => {
             'koi.time': 'needs to be a valid time string',
             'koi.timeWithoutSeconds': 'needs to be a valid time without seconds string',
             'koi.date': 'needs to be a valid date string',
+            'koi.dateAfter': 'needs to be after the given date',
+            'koi.dateSameOrAfter': 'needs to be on or after the given date',
+            'koi.dateBefore': 'needs to be before the given date',
+            'koi.dateSameOrBefore': 'needs to be on or before the given date',
             'koi.datetime': 'needs to be a valid datetime string',
             'koi.endDate': 'needs to be larger than or equal to start date',
             'koi.missingStartDate': 'a startDate field is missing',
@@ -116,6 +126,74 @@ const koiExtension: Joi.ExtensionFactory = (joi) => {
                         return value;
                     } else {
                         return helpers.error('koi.endDate');
+                    }
+                },
+            },
+            dateAfter: {
+                method(date: DateLike) {
+                    return this.$_addRule({ name: 'dateAfter', args: { date } });
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
+
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isAfter(otherDate)) {
+                        return value;
+                    } else {
+                        return helpers.error('koi.dateAfter');
+                    }
+                },
+            },
+            dateSameOrAfter: {
+                method(date: DateLike) {
+                    return this.$_addRule({ name: 'dateSameOrAfter', args: { date } });
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
+
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isSameOrAfter(otherDate)) {
+                        return value;
+                    } else {
+                        return helpers.error('koi.dateSameOrAfter');
+                    }
+                },
+            },
+            dateBefore: {
+                method(date: DateLike) {
+                    return this.$_addRule({ name: 'dateBefore', args: { date } });
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
+
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isBefore(otherDate)) {
+                        return value;
+                    } else {
+                        return helpers.error('koi.dateBefore');
+                    }
+                },
+            },
+            dateSameOrBefore: {
+                method(date: DateLike) {
+                    return this.$_addRule({ name: 'dateSameOrBefore', args: { date } });
+                },
+                validate(value: any, helpers: any, args: Record<string, any>, options: any) {
+                    const valueDate = moment(value, true);
+                    const otherDate = moment(args.date, true);
+
+                    if (!valueDate.isValid() || !otherDate.isValid()) {
+                        return helpers.error('koi.date');
+                    } else if (valueDate.isSameOrBefore(otherDate)) {
+                        return value;
+                    } else {
+                        return helpers.error('koi.dateSameOrBefore');
                     }
                 },
             },
