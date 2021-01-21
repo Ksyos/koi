@@ -57,6 +57,66 @@ describe('Date validation', () => {
     });
 });
 
+describe('Date after', () => {
+    it('should validate a date after', () => {
+        const result = Koi.koi().dateAfter('2010-07-01').validate('2010-07-02');
+        assert.notExists(result.error);
+    });
+    it('should error on same date', () => {
+        const result = Koi.koi().dateAfter('2010-07-01').validate('2010-07-01');
+        assertErrorType(result, 'koi.dateAfter');
+    });
+    it('should error on a date before', () => {
+        const result = Koi.koi().dateAfter('2010-07-02').validate('2010-07-01');
+        assertErrorType(result, 'koi.dateAfter');
+    });
+});
+
+describe('Date same or after', () => {
+    it('should validate a date after', () => {
+        const result = Koi.koi().dateSameOrAfter('2010-07-01').validate('2010-07-02');
+        assert.notExists(result.error);
+    });
+    it('should validate same date', () => {
+        const result = Koi.koi().dateSameOrAfter('2010-07-01').validate('2010-07-01');
+        assert.notExists(result.error);
+    });
+    it('should error on a date before', () => {
+        const result = Koi.koi().dateSameOrAfter('2010-07-02').validate('2010-07-01');
+        assertErrorType(result, 'koi.dateSameOrAfter');
+    });
+});
+
+describe('Date before', () => {
+    it('should validate a date before', () => {
+        const result = Koi.koi().dateBefore('2010-07-02').validate('2010-07-01');
+        assert.notExists(result.error);
+    });
+    it('should error on same date', () => {
+        const result = Koi.koi().dateBefore('2010-07-01').validate('2010-07-01');
+        assertErrorType(result, 'koi.dateBefore');
+    });
+    it('should error on a date after', () => {
+        const result = Koi.koi().dateBefore('2010-07-01').validate('2010-07-02');
+        assertErrorType(result, 'koi.dateBefore');
+    });
+});
+
+describe('Date same or before', () => {
+    it('should validate a date before', () => {
+        const result = Koi.koi().dateSameOrBefore('2010-07-02').validate('2010-07-01');
+        assert.notExists(result.error);
+    });
+    it('should validate same date', () => {
+        const result = Koi.koi().dateSameOrBefore('2010-07-01').validate('2010-07-01');
+        assert.notExists(result.error);
+    });
+    it('should error on a date after', () => {
+        const result = Koi.koi().dateSameOrBefore('2010-07-01').validate('2010-07-02');
+        assertErrorType(result, 'koi.dateSameOrBefore');
+    });
+});
+
 describe('Datetime validation', () => {
     it('should validate a good datetime', () => {
         const result = Koi.koi().datetime().validate('2010-07-01 11:12:13');
